@@ -17,8 +17,10 @@ const notFound = require('./Middlewares/notFound');
 const ErrorHandler = require('./Middlewares/error-handler');
 const AuthRoutes = require('./Routes/AuthRoutes');
 const UserRoutes = require('./Routes/UserRoutes');
-// const ProductRoutes = require('./Routes/ProductRoutes');
-// const ReviewRoutes = require('./Routes/ReviewRoutes');
+const CategoryRoutes = require('./Routes/CategoryRoutes');
+const BrandRoutes = require('./Routes/BrandRoutes');
+const ProductRoutes = require('./Routes/ProductRoutes');
+const ReviewRoutes = require('./Routes/ReviewRoutes');
 // const OrderRoutes = require('./Routes/OrderRoutes')
 const cloudinary = require('cloudinary').v2;
 cloudinary.config({
@@ -49,8 +51,10 @@ app.use(fileUpload({useTempFiles: true}));
 app.use(express.static('public'));
 app.use('/api/v1/auth', AuthRoutes)
 app.use('/api/v1/auth/users', UserRoutes)
-// app.use('/api/v1/products', ProductRoutes)
-// app.use('/api/v1/reviews', ReviewRoutes)
+app.use('/api/v1/categories', CategoryRoutes)
+app.use('/api/v1/brands', BrandRoutes)
+app.use('/api/v1/products', ProductRoutes)
+app.use('/api/v1/reviews', ReviewRoutes)
 // app.use('/api/v1/orders', OrderRoutes)
 
 
