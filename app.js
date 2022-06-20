@@ -15,8 +15,8 @@ const cors = require('cors');
 const connectDB = require('./DB/connect');
 const notFound = require('./Middlewares/notFound');
 const ErrorHandler = require('./Middlewares/error-handler');
-// const AuthRoutes = require('./Routes/AuthRoutes');
-// const UserRouter = require('./Routes/UserRoutes');
+const AuthRoutes = require('./Routes/AuthRoutes');
+const UserRoutes = require('./Routes/UserRoutes');
 // const ProductRoutes = require('./Routes/ProductRoutes');
 // const ReviewRoutes = require('./Routes/ReviewRoutes');
 // const OrderRoutes = require('./Routes/OrderRoutes')
@@ -47,8 +47,8 @@ app.use(fileUpload({useTempFiles: true}));
 
 //Routes
 app.use(express.static('public'));
-// app.use('/api/v1/auth', AuthRoutes)
-// app.use('/api/v1/auth/users', UserRouter)
+app.use('/api/v1/auth', AuthRoutes)
+app.use('/api/v1/auth/users', UserRoutes)
 // app.use('/api/v1/products', ProductRoutes)
 // app.use('/api/v1/reviews', ReviewRoutes)
 // app.use('/api/v1/orders', OrderRoutes)
