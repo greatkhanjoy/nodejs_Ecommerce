@@ -1,5 +1,6 @@
 const User = require('../Models/User')
 const bcrypt = require('bcryptjs')
+const {checkPermission} = require('../Utills')
 
 const getAllUser = async (req, res) => {
     const user = await User.find().select('-password -verficationToken')
@@ -20,10 +21,13 @@ const getSingleUser = async (req, res) => {
     if(!user) {
         return res.status(404).json({message: 'User not found'})
     }
+    checkPermission(req.user, user)
     res.status(200).json(user)
 }
 
 const updateUser = async (req, res) => {
+    const isUser = await User.findById(req.params.id)
+    checkPermission(req.user, isUser)
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true}).select('-password -verficationToken')
 
     if(!user) {
@@ -43,6 +47,8 @@ const updateUserPassword = async (req, res) => {
         return res.status(404).json({message: 'User not found'})
     }
 
+    checkPermission(req.user, user)
+
     const isMatch = await bcrypt.compare(password, user.password)
     if(!isMatch) {
         return res.status(400).json({message: 'Old Password is incorrect'})
@@ -56,6 +62,9 @@ const updateUserPassword = async (req, res) => {
 }
 
 const deleteUser = async (req, res) => {
+    const isUser = await User.findById(req.params.id)
+    checkPermission(req.user, isUser)
+
     const user = await User.findById(req.params.id).select('-password')
     if(!user) {
         return res.status(404).json({message: 'User not found'})

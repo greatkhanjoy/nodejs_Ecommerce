@@ -7,7 +7,7 @@ const {getAllUser, createUser, getSingleUser, updateUser, updateUserPassword, de
 const {authorizeUser, isAdmin, authorizedPermissions} = require('../Middlewares/Authentication');
 
 
-Router.route('/').get(getAllUser).post(authorizeUser, createUser);
+Router.route('/').get(authorizeUser, isAdmin,  getAllUser).post(authorizeUser, isAdmin, createUser);
 Router.route('/:id').get(authorizeUser, getSingleUser).put(authorizeUser, updateUser).delete(authorizeUser, deleteUser);
 Router.route('/password/:id').put(authorizeUser, updateUserPassword); // update user password
 
