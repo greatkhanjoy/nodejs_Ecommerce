@@ -43,7 +43,13 @@ const UserSchema = new Schema({
     verficationToken: {
         type: String,
         default: null
-    }
+    },
+    resetPasswordToken: {
+        type: String
+    },
+    resetPasswordExpiry: {
+        type: Date
+    },
 
 }, { timestamps: true });
 

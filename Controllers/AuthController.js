@@ -65,21 +65,23 @@ const verifyEmail = async (req, res) => {
     res.status(200).send('Email verified successfully.');
 }
 
-const requestResetPassword = async (req, res) => {
-    const {email} = req.body;
+const forgotPassword = async (req, res) => {
+    const {email} = req.body; 
     if(!email) {
         return res.status(400).json({message: 'Email is required'});
     }
 
     const user = await User.findOne({email});
-    if(!user) {
-        return res.status(404).json({message: 'User not found'});
+    if(user) {
+        const tenMinute = 1000 * 60 * 10;
+        const resetPasswordExpiry = new Date(Date.now() + tenMinute);
+        const resetPasswordToken = crypto.randomBytes(40).toString('hex');
+        const updatedUser = await User.findOneAndUpdate({email}, {resetPasswordToken, resetPasswordExpiry}, {new: true, runValidators: true});
+        const subject = 'Reset your password';
+        const text = `Please reset your password by clicking on the link below: <a href="${process.env.APP_URL}/api/v1/auth/reset-password?token=${updatedUser.resetPasswordToken}&email=${updatedUser.email}" >Reset</a>`;
+        sendEmail(user.email, subject, text);
     }
-    const verficationToken = crypto.randomBytes(40).toString('hex');
-    const updatedUser = await User.findOneAndUpdate({email}, {verficationToken}, {new: true, runValidators: true});
-    const subject = 'Reset your password';
-    const text = `Please reset your password by clicking on the link below: <a href="${process.env.APP_URL}/api/v1/auth/reset-password?token=${updatedUser.verficationToken}&email=${updatedUser.email}" >Reset</a>`;
-    sendEmail(user.email, subject, text);
+    res.status(200).json({message: 'Please check your email for reset password link'});
 }
 
 const resetPassword = async (req, res) => {
@@ -91,20 +93,33 @@ const resetPassword = async (req, res) => {
     if(!user) {
         return res.status(404).json({message: 'Invalid link'});
     }
-    if(!user.verficationToken) {
+    if(!user.resetPasswordToken) {
         return res.status(400).json({message: 'Link expired!'});
     }
 
-    if(user.verficationToken.toString !== token.toString) {
-        return res.status(400).json({message: 'Invalid link. Try to reset password.'});
+    if(user.resetPasswordToken.toString !== token.toString) {
+        return res.status(400).json({message: 'Invalid link.'});
     }
-    const {password} = req.body;
-    if(!password) {
-        return res.status(400).json({message: 'Password is required'});
+    if(user.resetPasswordExpiry < Date.now()) {
+        return res.status(400).json({message: 'Link expired!'});
     }
-    user.password = password;
-    user.verficationToken = null;
-    await user.save();
+    
+    res.status(200).json({message: 'Please enter your new password'});
 }
 
-module.exports = {registerUser, login, logout, verifyEmail, resetPassword, requestResetPassword};
+const setPassword = async (req, res) => {
+    const {email, token, password} = req.body;
+    if(!email || !password || !token) {
+        return res.status(400).json({message: 'Please provide all the details'});
+    }
+    const user = await User.findOne({email});
+    if(user) {
+        user.password = password;
+        user.resetPasswordToken = null;
+        user.resetPasswordExpiry = null;
+        await user.save();
+    }
+    res.status(200).json({message: 'Password reset successfully'});
+}
+
+module.exports = {registerUser, login, logout, verifyEmail, resetPassword, forgotPassword, setPassword};
